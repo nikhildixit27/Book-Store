@@ -41,6 +41,17 @@ app.get("/all-books", async (req, res) => {
     }
 });
 
+//Getting a single book
+app.get("/book/:id", async (req, res) => {
+    try {
+        const result = await bookStore.findById(req.params.id);
+        res.send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+})
+
 // updating the books
 app.patch("/update-book/:id", async (req, res) => {
     try {
@@ -65,6 +76,33 @@ app.delete("/delete-book/:id", async (req, res) => {
     }
 });
 
+//getting books on the basis of genre/category
+app.get("/books/:category", async (req, res) => {
+    try {
+        const result = await bookStore.find({ category: req.params.category });
+        res.send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// Search functionality for books
+app.get("/books/search/:searchCriteria", async (req, res) => {
+    const searchQuery = req.params.searchCriteria;
+    try {
+        const result = await bookStore.find({
+            $or: [
+                { title: { $regex: searchQuery, $options: "i" } },
+                { author: { $regex: searchQuery, $options: "i" } }
+            ]
+        });
+        res.send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`)
